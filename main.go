@@ -143,6 +143,181 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     return 
   }
 
+  User, exists := mockDB[creds.Username]
+  if !exists {
+    http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+    return
+  }
+
+  err = bcrypt.CompareHashAndPassword(users.PasswordHash, []byte(creds.Password))
+  if err != nil {
+    http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+    return
+  }
+
+  //Generate the JWT token
+  token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+        "username" : creds.Username,
+        "exp":       time.Now().Add(1 * time.Hour).Unix(),
+    })
+
+  tokenString, err := token.SignedString(jwtKey)
+  if err != nil {
+    http.Error(w, "Internal server error", http.StatusInternalServerError)
+    return
+  }
+
+  //send the token back
+  w.Header().Set("Content-Type", "application/json")
+  responseData := map[string]string{
+    "token" : tokenString,
+  }
+  responseBytes, _ := json.Marshal(responseData)
+  w.Write(responseBytes)
+}
+
+//SecretHandler returns a top-secret payload (only accessible if authenticated).
+func SecretHandler(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Content-Type", "application/json")
+
+  message := map[string]string{
+    "message" : "CodeChef Contest Server: Hidden testcase archieve unlocked.",
+  }
+  responseBytes, _ :=json.Marshal(message)
+  w.Write(responseBytes)
+}
+
+//LogoutHandler extracts the current token and adds it to the blacklist.
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+  authHeader := r.Header.Get("Authorization")
+  tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+  blacklist.Add(tokenStr)
+
+  w.Header().Set("Content-Type", "application/json")
+  responseData := map[string]string{
+       "message": "Successfully logged out",
+  }
+  responseBytes, _ :=json.Marshal(responseData)
+  w.Write(responseBytes)
+}
+
+
+// ---5. SECURITY MIDDLEWARE ---
+//authMiddleware intercepts incoming requests, validates the JWT, and checks the blacklist.
+
+func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
+  return func(w http.ResponseWriter, r*http.Request) {
+    authHeader := r.Header.Get("Authorization")
+    if authHeader == ""{
+      http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
+      return
+    }
+
+    //Extract the Token
+    tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+    //check the Blacklist
+    if blacklist.Contains(tokenStr) {
+      http.Error(w, "Token has been invalidated (Logged out)", http.StatusUnauthorized)
+      return
+      }
+    
+    //Parse and validate the token signature
+    token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+      _, ok := token.Method(*jwt.SigningMethodHMAC)
+
+
+      if !ok {
+        return nil, fmt.Errorf("unexpected signing method")
+      }
+      return jwtKey, nil
+    })
+
+    if err != nil || !token.Valid {
+      http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
+      return
+    }
+
+    //Token is valid. Pass the request to the actual handler.
+    next(w, r)
+  }
+
+}
+  
+
+
+
+      
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 
 
 

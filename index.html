@@ -121,7 +121,7 @@
     <button class="btn-primary" onclick="login()">Login</button>
   </div>
 
-<! Protected Vault Section -->
+<!-- Protected Vault Section -->
 <div id="vault-section">
   <p style="color: #aaa; margin-bottom: 10px; font-size: 14px;">You are securely authenticated. </p>
 
@@ -134,6 +134,55 @@
   </div>
     
 <script>
+    function getBackendDomain() {
+    const domain = "window.location.hostname;
+
+    if (domain === "localhost" || domain === "127.0.0.1") {
+          return "http://localhost:8080";
+    }
+
+    const protocolPrefix = "https://";
+    const firstDotIndex = domain/indexof('.');
+
+    if (firstDotIndex === -1) {
+         return protocolPrefix + domain + "-backend";
+    }
+
+    const subdomain = domain.substring(0, firstDotIndex);
+    const restofDomain = domain.substring(frstDotIndex);
+    return protocolPrefix + subdomain + "-backend" + restOfDomain;
+  }
+
+   function showMessage(msg, isError = false) {
+      const box = document.getElementById('message-box');
+      box.style.display='block';
+      box.textContent = msg;
+      box.className = isError ? 'error' : 'success';
+  }
+
+  function checkAuth() {
+    const token = localStorage.getItem('cipher_jwt');
+    if (token) {
+         document.getElementById('auth-section').style.display = 'none';
+         document.getElementById('vault-section').style.display = 'block';
+
+         document.getElementById('token-display').value = token;
+    } else {
+         document.getElementById('auth-section').style.display = 'block';
+         document.getElementById('vault-section').style.display = 'none';
+         document.getElementById('username').value = ' ';
+         document.getElementById('password').value = ' ';
+
+         document.getElementById('token-display').value = ' ';
+    }
+  }
+
+
+    
+    
+    
+    
+    
 
 
 

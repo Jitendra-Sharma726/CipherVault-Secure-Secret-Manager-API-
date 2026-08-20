@@ -108,31 +108,32 @@
 </head>
 </body>
 
-  
-  
+<div class="vault-card">
+  <h2> CipherVault</h2>
+
+  <!-- Login and Register Section -->
+  <div id="auth-section">
+    <div class="input-group">
+      <input type="text" id="username" placeholder="Username" autocomplete="off">
+      <input type="password" id="password" placeholder="Password">
+    </div>
+    <button class="btn-secondary" onclick="register()">Register</button>
+    <button class="btn-primary" onclick="login()">Login</button>
+  </div>
+
+<! Protected Vault Section -->
+<div id="vault-section">
+  <p style="color: #aaa; margin-bottom: 10px; font-size: 14px;">You are securely authenticated. </p>
+
+  <p style="color: #888; font-size: 12px; margin: 0 0 5px 0; text-align: left;">Your Active JWT:</p>
+  <textarea id="token-display" rows="4" readonly</textarea>
+
+  <button class="btn-primary" onclick="getSecret()">Access Launch Codes</button>
+  <button class="btn-danger" onlcick="logout()">Secure Logout</button>
     
-
-
-  
-
+  </div>
     
-    
-
-
-
-
-
-
-
-
-
-
-
-
-     
-
-    
-  </style>
+<script>
 
 
 
@@ -146,11 +147,4 @@
 
 
 
-
-
-
-
-
-
-  
-</head>  
+      

@@ -177,6 +177,199 @@
     }
   }
 
+ //1. Register API Call
+ async function register() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    const apiUrl = getBackendDomain() + "/register";
+
+    try {
+        const res = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p })
+         });
+
+       if (res.ok) {
+            showMessage("Registered successfully! You can now login.");
+       } else {
+            const text = await res.text();
+            showMessage(text, true);
+      }
+    } catch (error) {
+      showMessage("Network Error. Is the backend running?", true);
+    }
+  }
+
+ //2. Login API Call
+
+ async function login() {
+    const u = document.getElementById('username').value;
+    const p = document.getElementById('password').value;
+    const apiUrl = getBackendDomain() + "/login";
+
+
+    try {
+       const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+      });
+
+    if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('cipher_jwt', data.token);
+        showMessage("Logged in successfully!");
+        checkAuth();
+    } else {
+        const text = await res.text();
+        showMessage(text, true);
+     }
+   } catch (error) {
+      showMessage("Network Error. Is the backend running?", true);
+   } 
+ }
+
+//3. Access Protected Route (Requires JWT)
+async function getSecret() {
+    const token = localStorage.getItem('cipher_jwt');
+    const apiUrl = getBackendDomain() + "/secret";
+
+
+    try {
+        const res = await fetch(apiUrl, {
+            method: 'GET',
+
+        //Attach JWT
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+        const data = await res.json();
+        showMessage(`Secret Unlocked: ${data.message}`);
+    } else {
+       const text = await res.text();
+       showMessage(`Access Denied: ${text}`, true);
+
+    // if token is invalid or blacklisted, force logout on the frontend
+    if (res.status === 401) {
+         localStorage.removeItem('cipher_jwt').
+      
+       // Wait 2 seconds then reset UI
+       setTimeout(checkAuth, 2000);
+    }
+  }
+ } catch (error) {
+    showMessage("Network Error.",true);
+  }
+}
+
+
+//4. Secure Logout API Call
+async function logout() {
+    const token = localStorage.getItem('cipher_jwt');
+    const apiUrl = getBackendDomain() + "/logout";
+
+    try{
+     const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+     });
+
+    if (res.ok) {
+
+      //clear local storage
+      localStorage.removeItem('cipher_jwt');
+      showMessage("Logged out securely. Token Blacklisted.");
+      checkAuth();
+    }
+} catch (error) {
+    showMessage("Network Error.", true);
+  }
+}
+
+//Run auth check on page load
+  checkAuth();
+
+</script>
+    
+</body>
+</html>    
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+
 
     
     
